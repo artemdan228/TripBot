@@ -1,0 +1,14 @@
+# Target labels
+ curl-populate
+# Source files and their labels
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/CMakeFiles/curl-populate
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/CMakeFiles/curl-populate.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/CMakeFiles/curl-populate-complete.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-build.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-configure.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-download.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-install.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-mkdir.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-patch.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-test.rule
+/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-update.rule

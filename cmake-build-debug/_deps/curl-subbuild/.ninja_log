@@ -1,0 +1,21 @@
+# ninja log v6
+0	16	1739994371086967188	curl-populate-prefix/src/curl-populate-stamp/curl-populate-mkdir	ef9919dd8f0cd8b0
+1926	2037	1739994373106131564	curl-populate-prefix/src/curl-populate-stamp/curl-populate-configure	cb411c67b0e32c2
+0	16	1739994371086967188	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-mkdir	ef9919dd8f0cd8b0
+1926	2037	1739994373106131564	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-configure	cb411c67b0e32c2
+16	1879	1739994372949709792	curl-populate-prefix/src/curl-populate-stamp/curl-populate-download	134ad16b1828051b
+2073	2095	1739994373164573613	curl-populate-prefix/src/curl-populate-stamp/curl-populate-install	ca6164582ca9dd18
+1879	1905	1739994372975085267	curl-populate-prefix/src/curl-populate-stamp/curl-populate-update	6bfae72ca750154a
+1879	1905	1739994372975085267	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-update	6bfae72ca750154a
+1905	1926	1739994372996888608	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-patch	4006347e891dabf3
+2111	2138	1739994373209424798	curl-populate-prefix/src/curl-populate-stamp/curl-populate-done	3031f56e9225fa0b
+2073	2095	1739994373164573613	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-install	ca6164582ca9dd18
+2111	2138	1739994373209424798	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-done	3031f56e9225fa0b
+2095	2111	1739994373182818446	curl-populate-prefix/src/curl-populate-stamp/curl-populate-test	3484bf92749fec7d
+2095	2111	1739994373182818446	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-test	3484bf92749fec7d
+2037	2073	1739994373140880893	curl-populate-prefix/src/curl-populate-stamp/curl-populate-build	6bb1150b6eeff4a9
+16	1879	1739994372949709792	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-download	134ad16b1828051b
+2037	2073	1739994373140880893	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/curl-populate-prefix/src/curl-populate-stamp/curl-populate-build	6bb1150b6eeff4a9
+2111	2138	1739994373209424798	CMakeFiles/curl-populate-complete	3031f56e9225fa0b
+1905	1926	1739994372996888608	curl-populate-prefix/src/curl-populate-stamp/curl-populate-patch	4006347e891dabf3
+2111	2138	1739994373209424798	/Users/artem/TripBot/cmake-build-debug/_deps/curl-subbuild/CMakeFiles/curl-populate-complete	3031f56e9225fa0b
