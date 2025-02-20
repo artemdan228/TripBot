@@ -38,6 +38,21 @@ void RouteParser::parse() {
         route.arrival = segment["arrival"];
         route.hasTransfers = segment["has_transfers"];
 
+        // if (segment.contains("has_transfers")) {
+        //     if (segment.contains("details")) {
+        //         for (const auto& detail : segment["details"]) {
+        //             if (detail.contains("thread") && detail["thread"].contains("number")) {
+        //                 route.numbers.push_back(detail["thread"]["number"].get<std::string>());
+        //             }
+        //         }
+        //     }
+        // } else {
+        //     if (segment.contains("thread") && segment["thread"].contains("number")) {
+        //         route.numbers.push_back(segment["thread"]["number"].get<std::string>());
+        //     }
+        // }
+
+
         if (segment.contains("details")) {
             for (const auto& detail : segment["details"]) {
                 if (detail.contains("thread") && detail["thread"].contains("number")) {
@@ -139,13 +154,29 @@ void RouteParser::printRoutes() const {
             std::cout << "   🔁 Пересадка: Прямой маршрут, пересадок нет!"<< std::endl;
         }
 
-        std::cout << "   ✈ Рейсы: ";
-        for (const auto& flight_number : route.numbers) {
-            std::cout << flight_number << " ";
+        std::cout << "   🚀 Рейсы: " << "\n";
+
+        for (size_t i = 0; i < route.numbers.size(); ++i) {
+
+            // if (route.transport_types[i] == "plane") {
+            //     route.transport_types[i] == "Самолёт";
+            // }
+
+            std::cout << "      🛑 " << (route.transport_types[i] == "plane" ? "Самолёт" :
+            route.transport_types[i] == "train" ? "Поезд" :
+            route.transport_types[i] == "suburban" ? "Электричка" :
+            route.transport_types[i] == "bus" ? "Автобус" :
+            route.transport_types[i] == "water" ? "Водный транспорт" :
+            route.transport_types[i] == "helicopter" ? "Вертолёт" :
+            route.transport_types[i])
+            << " | " << route.numbers[i] << "\n";
+        }
+
+        // for (const auto& flight_number : route.numbers) {
+        //     std::cout << "      🛑 " << flight_number << "\n";
             // for(const auto& transport_type : route.transport_types) {
             //     std::cout << transport_type << flight_number << " ";
             // }
-        }
         std::cout << std::endl;
 
         std::cout << "--------------------------" << std::endl;
