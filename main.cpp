@@ -29,7 +29,6 @@ std::string DateParser(std::string& inputDate) {
     return "";
 }
 
-
 int main() {
 
     std::cout << "Введите дату поездки туда:" << "\n";

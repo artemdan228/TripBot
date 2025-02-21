@@ -23,43 +23,82 @@ void RouteParser::parse() {
 
         if (segment.contains("departure_from") && segment["departure_from"].contains("title")) {
             route.from_station = segment["departure_from"]["title"];
-        }
-        if (segment.contains("arrival_to") && segment["arrival_to"].contains("title")) {
-            route.to_station = segment["arrival_to"]["title"];
+        } else if (segment.contains("from") && segment["from"].contains("popular_title") && !segment["from"]["popular_title"].is_null()) {
+            route.from_station = segment["from"]["popular_title"];
         }
 
-        if (segment.contains("transport_types")) {
-            for (const auto& transport_type : segment["transport_types"]) {
-                route.transport_types.push_back(transport_type.get<std::string>());
-            }
+        if (segment.contains("arrival_to") && segment["arrival_to"].contains("title")) {
+            route.to_station = segment["arrival_to"]["title"];
+        } else if (segment.contains("to") && segment["to"].contains("popular_title") && !segment["to"]["popular_title"].is_null()) {
+            route.to_station = segment["to"]["popular_title"]; // Исправлено здесь
         }
 
         route.departure = segment["departure"];
         route.arrival = segment["arrival"];
         route.hasTransfers = segment["has_transfers"];
 
-        // if (segment.contains("has_transfers")) {
-        //     if (segment.contains("details")) {
-        //         for (const auto& detail : segment["details"]) {
-        //             if (detail.contains("thread") && detail["thread"].contains("number")) {
-        //                 route.numbers.push_back(detail["thread"]["number"].get<std::string>());
-        //             }
-        //         }
+        // if (segment.contains("transport_types")) {
+        //     for (const auto& transport_type : segment["transport_types"]) {
+        //         route.transport_types.push_back(transport_type.get<std::string>());
         //     }
         // } else {
-        //     if (segment.contains("thread") && segment["thread"].contains("number")) {
-        //         route.numbers.push_back(segment["thread"]["number"].get<std::string>());
+        //     if (segment.contains("thread") && segment["thread"].contains("transport_type") && !segment["thread"]["transport_type"].is_null()) {
+        //         route.transport_types.push_back(segment["thread"]["transport_type"].get<std::string>());
         //     }
         // }
 
+        // if (segment.contains("details") && segment["details"].is_array()) {
+        //     for (const auto& detail : segment["details"]) {
+        //         if (detail.contains("thread") && detail["thread"].contains("number") && detail["thread"]["number"].is_string()) {
+        //             route.numbers.push_back(detail["thread"]["number"].get<std::string>());
+        //         }
+        //     }
+        // } else if (!segment.contains("details") && segment.contains("thread") && segment["thread"].contains("number") && !segment["thread"]["number"].is_null()) {
+        //     route.numbers.push_back(segment["thread"]["number"].get<std::string>());
+        // }
 
-        if (segment.contains("details")) {
-            for (const auto& detail : segment["details"]) {
-                if (detail.contains("thread") && detail["thread"].contains("number")) {
-                    route.numbers.push_back(detail["thread"]["number"].get<std::string>());  // Добавляем номер рейса
+        // Проверяем, есть ли поле "has_transfers"
+        if (segment.contains("has_transfers")) {
+            bool hasTransfers = segment["has_transfers"].get<bool>();
+            std::cout << "has_transfers: " << hasTransfers << std::endl; // Отладочная печать
+
+            if (hasTransfers) {
+                if (segment.contains("details")) {
+                    for (const auto& detail : segment["details"]) {
+                        if (detail.contains("thread") && detail["thread"].contains("number")) {
+                            std::string flightNumber = detail["thread"]["number"].get<std::string>();
+                            std::cout << "Flight number (with transfer): " << flightNumber << std::endl; // Отладочная печать
+                            route.numbers.push_back(flightNumber);
+                        }
+                    }
+                }
+            } else {
+                // Если нет пересадок, просто получаем номер рейса из "thread"
+                if (segment.contains("thread") && segment["thread"].contains("number")) {
+                    std::string flightNumber = segment["thread"]["number"].get<std::string>();
+                    std::cout << "Flight number (no transfer): " << flightNumber << std::endl; // Отладочная печать
+                    route.numbers.push_back(flightNumber);
                 }
             }
+        } else {
+            std::cout << "has_transfers field is missing!" << std::endl; // Отладочная печать, если поля нет
+            // Если нет поля "has_transfers", можно считать, что пересадок нет
+            if (segment.contains("thread") && segment["thread"].contains("number")) {
+                std::string flightNumber = segment["thread"]["number"].get<std::string>();
+                std::cout << "Flight number (no transfers field): " << flightNumber << std::endl; // Отладочная печать
+                route.numbers.push_back(flightNumber);
+            }
         }
+
+
+
+        // if (segment.contains("details")) {
+        //     for (const auto& detail : segment["details"]) {
+        //         if (detail.contains("thread") && detail["thread"].contains("number")) {
+        //             route.numbers.push_back(detail["thread"]["number"].get<std::string>());  // Добавляем номер рейса
+        //         }
+        //     }
+        // }
 
         if (route.hasTransfers && segment.contains("transfers")) {
             if (segment["transfers"].size() > 1) {
@@ -158,9 +197,6 @@ void RouteParser::printRoutes() const {
 
         for (size_t i = 0; i < route.numbers.size(); ++i) {
 
-            // if (route.transport_types[i] == "plane") {
-            //     route.transport_types[i] == "Самолёт";
-            // }
 
             std::cout << "      🛑 " << (route.transport_types[i] == "plane" ? "Самолёт" :
             route.transport_types[i] == "train" ? "Поезд" :
