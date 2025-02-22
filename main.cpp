@@ -36,6 +36,29 @@ std::string DateParser(std::string& inputDate) {
     return "";
 }
 
+std::string getCurrentDate() {
+    auto now = std::chrono::system_clock::now();
+    auto time_t_now = std::chrono::system_clock::to_time_t(now);
+    std::tm tm_now = *std::localtime(&time_t_now);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm_now, "%Y-%m-%d");
+    return oss.str();
+}
+
+void clearOldCache(std::unordered_map<std::string, nlohmann::json>& cache) {
+    std::string currentDate = getCurrentDate();
+
+    for (auto it = cache.begin(); it != cache.end();) {
+        size_t pos = it->first.find(currentDate);
+        if (pos == std::string::npos) {
+            it = cache.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 void loadCacheFromFile(std::unordered_map<std::string, nlohmann::json>& cache, const std::string& filename) {
     std::ifstream inputFile(filename);
     if (inputFile.is_open()) {
@@ -61,6 +84,7 @@ void saveCacheToFile(const std::unordered_map<std::string, nlohmann::json>& cach
 
 int main() {
 
+    clearOldCache(routeCache);
     loadCacheFromFile(routeCache, "cache.json");
 
     std::cout << "Введите дату поездки туда:" << "\n";
@@ -89,7 +113,6 @@ int main() {
     nlohmann::json jsonData_from;
     if (routeCache.find(cacheKey_from) != routeCache.end()) {
         jsonData_from = routeCache[cacheKey_from];
-        std::cout << "Данные маршрута туда найдены в кэше." << std::endl;
     } else {
         std::string url_from = "https://api.rasp.yandex.net/v3.0/search/"
                                "?from=" + request.from +
@@ -114,7 +137,6 @@ int main() {
     nlohmann::json jsonData_to;
     if (routeCache.find(cacheKey_to) != routeCache.end()) {
         jsonData_to = routeCache[cacheKey_to];
-        std::cout << "Данные маршрута обратно найдены в кэше." << std::endl;
     } else {
         std::string url_to = "https://api.rasp.yandex.net/v3.0/search/"
                              "?from=" + request.to +
