@@ -58,17 +58,49 @@ void RouteParser::parse() {
         //     route.numbers.push_back(segment["thread"]["number"].get<std::string>());
         // }
 
-        if (segment.contains("has_transfers")) {
-            if (segment.contains("details")) {
-                for (const auto& detail : segment["details"]) {
-                    if (detail.contains("thread") && detail["thread"].contains("number")) {
-                        route.numbers.push_back(detail["thread"]["number"].get<std::string>());
-                    }
+        if (segment.contains("details")) {
+            for (const auto& detail : segment["details"]) {
+                if (detail.contains("thread") && detail["thread"].contains("number")) {
+                    route.numbers.push_back(detail["thread"]["number"].get<std::string>());
                 }
-            } else if (segment.contains("thread") && segment["thread"].contains("number")) {
-                route.numbers.push_back(segment["thread"]["number"].get<std::string>());
+
+                if (detail.contains("thread") && detail["thread"].contains("carrier") && detail["thread"]["carrier"].contains("title")) {
+                    route.company.push_back(detail["thread"]["carrier"]["title"].get<std::string>());
+                }
+
+                if (detail.contains("thread") && detail["thread"].contains("title")) {
+                    route.route_main.push_back(detail["thread"]["title"].get<std::string>());
+                }
+
+                if (detail.contains("departure")) {
+                    route.dep_time_route.push_back(detail["departure"].get<std::string>());
+                }
+
+                if (detail.contains("arrival")) {
+                    route.arr_time_route.push_back(detail["arrival"].get<std::string>());
+                }
             }
+        } else if (segment.contains("thread") && segment["thread"].contains("number")) {
+            route.numbers.push_back(segment["thread"]["number"].get<std::string>());
+        } if (segment.contains("thread") && segment["thread"].contains("carrier") && segment["thread"]["carrier"].contains("title")) {
+            route.company.push_back(segment["thread"]["carrier"]["title"].get<std::string>());
+        } if (segment.contains("thread") && segment["thread"].contains("title")) {
+            route.route_main.push_back(segment["thread"]["title"].get<std::string>());
+        } if (segment.contains("departure")) {
+            route.dep_time_route.push_back(segment["departure"].get<std::string>());
+        } if (segment.contains("arrival")) {
+            route.arr_time_route.push_back(segment["arrival"].get<std::string>());
         }
+
+        // if (segment.contains("details")) {
+        //     for (const auto& detail : segment["details"]) {
+        //         if (detail.contains("thread") && detail["thread"].contains("carrier") && detail["thread"]["carrier"].contains("title")) {
+        //             route.company.push_back(detail["thread"]["carrier"]["title"].get<std::string>());
+        //         }
+        //     }
+        // } else if (segment.contains("thread") && segment["thread"].contains("carrier") && segment["thread"]["carrier"].contains("title")) {
+        //     route.company.push_back(segment["thread"]["carrier"]["title"].get<std::string>());
+        // }
 
         // if (segment.contains("details")) {
         //     for (const auto& detail : segment["details"]) {
@@ -91,6 +123,8 @@ void RouteParser::parse() {
         //     }
         // }
 
+
+
         if (route.hasTransfers && segment.contains("transfers")) {
             if (segment["transfers"].size() > 1) {
                 continue;
@@ -98,7 +132,7 @@ void RouteParser::parse() {
 
             for (const auto& transfer : segment["transfers"]) {
                 if (transfer.contains("title")) {
-                    route.transfers.push_back({transfer["title"]});
+                    route.transfers_titles.push_back(transfer["title"].get<std::string>());
                 }
             }
         }
@@ -131,7 +165,7 @@ std::string RouteParser::formatDateTime(const std::string& isoDateTime) const {
         return "Ошибка форматирования";
     }
 
-    std::string timezoneOffset = isoDateTime.substr(19);
+    std::string timezoneOffset = isoDateTime.substr(19, 3);
 
     char buffer[100];
     strftime(buffer, sizeof(buffer), "%d %B %Y, %H:%M", &tm);
@@ -150,7 +184,7 @@ std::string RouteParser::formatDateTime(const std::string& isoDateTime) const {
         }
     }
 
-    return formattedDate + " (GMT" + timezoneOffset + ")";
+    return formattedDate + " (UTC" + timezoneOffset + ")";
 }
 
 
@@ -174,9 +208,9 @@ void RouteParser::printRoutes() const {
         if (route.hasTransfers) {
             std::ostringstream transferInfo;
             transferInfo << "   🔁 Пересадка: ";
-            for (size_t i = 0; i < route.transfers.size(); ++i) {
-                transferInfo << route.transfers[i].title;
-                if (i != route.transfers.size() - 1) {
+            for (size_t i = 0; i < route.transfers_titles.size(); ++i) {
+                transferInfo << route.transfers_titles[i];
+                if (i != route.transfers_titles.size() - 1) {
                     transferInfo << ", ";
                 }
             }
@@ -190,14 +224,17 @@ void RouteParser::printRoutes() const {
         for (size_t i = 0; i < route.numbers.size(); ++i) {
 
 
-            std::cout << "      🛑 " << (route.transport_types[i] == "plane" ? "Самолёт" :
-            route.transport_types[i] == "train" ? "Поезд" :
-            route.transport_types[i] == "suburban" ? "Электричка" :
-            route.transport_types[i] == "bus" ? "Автобус" :
-            route.transport_types[i] == "water" ? "Водный транспорт" :
-            route.transport_types[i] == "helicopter" ? "Вертолёт" :
+            std::cout << "      🛑 " << (route.transport_types[i] == "plane" ? "✈️Самолёт" :
+            route.transport_types[i] == "train" ? "🚈Поезд" :
+            route.transport_types[i] == "suburban" ? "🚅Электричка" :
+            route.transport_types[i] == "bus" ? "🚌Автобус" :
+            route.transport_types[i] == "water" ? "⛴️Водный транспорт" :
+            route.transport_types[i] == "helicopter" ? "🚁Вертолёт" :
             route.transport_types[i])
-            << " | " << route.numbers[i] << "\n";
+            << " | " << route.numbers[i] << " (" << route.route_main[i] << ")" << " | " << route.company[i]
+            << " | " << formatDateTime(route.dep_time_route[i]).substr(formatDateTime(route.dep_time_route[i]).find(",") + 2)
+            << " - " << formatDateTime(route.arr_time_route[i]).substr(formatDateTime(route.arr_time_route[i]).find(",") + 2)
+            << "\n";
         }
 
         // for (const auto& flight_number : route.numbers) {
