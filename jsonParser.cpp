@@ -14,7 +14,6 @@ void RouteParser::parse() {
     }
 
     for (const auto& segment : data["segments"]) {
-
         RouteSegment route;
 
         route.from_city = data["search"]["from"]["title"];
@@ -28,24 +27,26 @@ void RouteParser::parse() {
         }
 
         if (segment.contains("arrival_to") && segment["arrival_to"].contains("title")) {
-            route.to_station = segment["arrival_to"]["title"];
+            if (segment["arrival_to"]["title"] == "Благовещенск") {
+                route.to_station = "Игнатьего";
+            } else {
+                route.to_station = segment["arrival_to"]["title"];
+            }
         } else if (segment.contains("to") && segment["to"].contains("popular_title") && !segment["to"]["popular_title"].is_null()) {
-            route.to_station = segment["to"]["popular_title"]; // Исправлено здесь
+            route.to_station = segment["to"]["popular_title"];
         }
 
-        route.departure = segment["departure"];
-        route.arrival = segment["arrival"];
+        route.departure_time = segment["departure"];
+        route.arrival_time = segment["arrival"];
         route.hasTransfers = segment["has_transfers"];
 
-        // if (segment.contains("transport_types")) {
-        //     for (const auto& transport_type : segment["transport_types"]) {
-        //         route.transport_types.push_back(transport_type.get<std::string>());
-        //     }
-        // } else {
-        //     if (segment.contains("thread") && segment["thread"].contains("transport_type") && !segment["thread"]["transport_type"].is_null()) {
-        //         route.transport_types.push_back(segment["thread"]["transport_type"].get<std::string>());
-        //     }
-        // }
+        if (segment.contains("transport_types")) {
+            for (const auto& transport_type : segment["transport_types"]) {
+                route.transport_types.push_back(transport_type.get<std::string>());
+            }
+        } else if (segment.contains("thread") && segment["thread"].contains("transport_type") && !segment["thread"]["transport_type"].is_null()){
+            route.transport_types.push_back(segment["thread"]["transport_type"].get<std::string>());
+        }
 
         // if (segment.contains("details") && segment["details"].is_array()) {
         //     for (const auto& detail : segment["details"]) {
@@ -57,38 +58,28 @@ void RouteParser::parse() {
         //     route.numbers.push_back(segment["thread"]["number"].get<std::string>());
         // }
 
-        // Проверяем, есть ли поле "has_transfers"
         if (segment.contains("has_transfers")) {
-            bool hasTransfers = segment["has_transfers"].get<bool>();
-            std::cout << "has_transfers: " << hasTransfers << std::endl; // Отладочная печать
-
-            if (hasTransfers) {
-                if (segment.contains("details")) {
-                    for (const auto& detail : segment["details"]) {
-                        if (detail.contains("thread") && detail["thread"].contains("number")) {
-                            std::string flightNumber = detail["thread"]["number"].get<std::string>();
-                            std::cout << "Flight number (with transfer): " << flightNumber << std::endl; // Отладочная печать
-                            route.numbers.push_back(flightNumber);
-                        }
+            if (segment.contains("details")) {
+                for (const auto& detail : segment["details"]) {
+                    if (detail.contains("thread") && detail["thread"].contains("number")) {
+                        route.numbers.push_back(detail["thread"]["number"].get<std::string>());
                     }
                 }
-            } else {
-                // Если нет пересадок, просто получаем номер рейса из "thread"
-                if (segment.contains("thread") && segment["thread"].contains("number")) {
-                    std::string flightNumber = segment["thread"]["number"].get<std::string>();
-                    std::cout << "Flight number (no transfer): " << flightNumber << std::endl; // Отладочная печать
-                    route.numbers.push_back(flightNumber);
-                }
-            }
-        } else {
-            std::cout << "has_transfers field is missing!" << std::endl; // Отладочная печать, если поля нет
-            // Если нет поля "has_transfers", можно считать, что пересадок нет
-            if (segment.contains("thread") && segment["thread"].contains("number")) {
-                std::string flightNumber = segment["thread"]["number"].get<std::string>();
-                std::cout << "Flight number (no transfers field): " << flightNumber << std::endl; // Отладочная печать
-                route.numbers.push_back(flightNumber);
+            } else if (segment.contains("thread") && segment["thread"].contains("number")) {
+                route.numbers.push_back(segment["thread"]["number"].get<std::string>());
             }
         }
+
+        // if (segment.contains("details")) {
+        //     for (const auto& detail : segment["details"]) {
+        //         if (detail.contains("thread") && detail["thread"].contains("vehicle") && !detail["thread"]["vehicle"].is_null()) {
+        //             route.vehicle.push_back(detail["thread"]["vehicle"].get<std::string>());
+        //         }
+        //     }
+        // } else if (segment.contains("thread") && segment["thread"].contains("vehicle") && !segment["thread"]["vehicle"].is_null()) {
+        //     route.vehicle.push_back(segment["thread"]["vehicle"].get<std::string>());
+        // }
+
 
 
 
@@ -177,7 +168,8 @@ void RouteParser::printRoutes() const {
 
         std::cout << "   📅 Дата: " << convertISO(route.date) << "\n";
 
-        std::cout << "   ⏳ Время отправления: " << formatDateTime(route.departure) << " | Время прибытия: " << formatDateTime(route.arrival) << std::endl;
+        std::cout << "   ⏳ Время отправления: " << formatDateTime(route.departure_time)
+        << " | Время прибытия: " << formatDateTime(route.arrival_time) << std::endl;
 
         if (route.hasTransfers) {
             std::ostringstream transferInfo;
@@ -210,11 +202,10 @@ void RouteParser::printRoutes() const {
 
         // for (const auto& flight_number : route.numbers) {
         //     std::cout << "      🛑 " << flight_number << "\n";
-            // for(const auto& transport_type : route.transport_types) {
-            //     std::cout << transport_type << flight_number << " ";
-            // }
-        std::cout << std::endl;
-
+        //     // for(const auto& transport_type : route.transport_types) {
+        //     //     std::cout << transport_type << flight_number << " ";
+        //     // }
+        // }
         std::cout << "--------------------------" << std::endl;
         count += 1;
     }

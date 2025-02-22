@@ -17,8 +17,9 @@ struct RouteSegment {
     std::string date;
     std::vector<std::string> numbers;
     std::vector<std::string> transport_types;
-    std::string departure;
-    std::string arrival;
+    std::vector<std::string> vehicle;
+    std::string departure_time;
+    std::string arrival_time;
     bool hasTransfers;
     std::vector<Transfer> transfers;
 };
