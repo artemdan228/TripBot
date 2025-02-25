@@ -202,7 +202,7 @@ void RouteParser::printRoutes() const {
 
         std::cout << "   📅 Дата: " << convertISO(route.date) << "\n";
 
-        std::cout << "   ⏳ Время отправления: " << formatDateTime(route.departure_time)
+        std::cout << "   ⏳  Время отправления: " << formatDateTime(route.departure_time)
         << " | Время прибытия: " << formatDateTime(route.arrival_time) << std::endl;
 
         if (route.hasTransfers) {

@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <fstream>
 
+using json = nlohmann::json;
+
 std::unordered_map<std::string, nlohmann::json> routeCache;
 
 struct ApiRequest {
@@ -59,6 +61,28 @@ void clearOldCache(std::unordered_map<std::string, nlohmann::json>& cache) {
     }
 }
 
+std::string find_city_yandex_code(const json& data, const std::string& city_name) {
+    for (const auto& country : data["countries"]) {
+        for (const auto& region : country["regions"]) {
+            for (const auto& settlement : region["settlements"]) {
+                std::string settlement_name = settlement["title"];
+
+                if (settlement_name == city_name) {
+                    if (settlement.contains("codes") && settlement["codes"].contains("yandex_code")) {
+                        return settlement["codes"]["yandex_code"].get<std::string>();
+                    }
+                    return "Код не найден";
+                }
+            }
+        }
+    }
+
+    return "Город не найден";
+}
+
+
+
+
 void loadCacheFromFile(std::unordered_map<std::string, nlohmann::json>& cache, const std::string& filename) {
     std::ifstream inputFile(filename);
     if (inputFile.is_open()) {
@@ -87,6 +111,14 @@ int main() {
     clearOldCache(routeCache);
     loadCacheFromFile(routeCache, "cache.json");
 
+    std::cout << "Введите город отправления:" << "\n";
+    std::string cityes_from;
+    std::cin >> cityes_from;
+
+    std::cout << "Введите город назначения:" << "\n";
+    std::string cityes_to;
+    std::cin >> cityes_to;
+
     std::cout << "Введите дату поездки туда:" << "\n";
     std::string inputDate_from;
     std::cin >> inputDate_from;
@@ -95,17 +127,36 @@ int main() {
     std::string inputDate_to;
     std::cin >> inputDate_to;
 
+    cpr::Response r_cityes_from = cpr::Get(cpr::Url{"https://api.rasp.yandex.net/v3.0/stations_list/?apikey=90dfe575-3c10-4440-a481-73a4650f08a1&lang=ru_RU&format=json"});
+    cpr::Response r_cityes_to = cpr::Get(cpr::Url{"https://api.rasp.yandex.net/v3.0/stations_list/?apikey=90dfe575-3c10-4440-a481-73a4650f08a1&lang=ru_RU&format=json"});
+
+    if (r_cityes_from.status_code != 200) {
+        std::cerr << "Ошибка запроса: " << r_cityes_from.status_code << std::endl;
+        return 1;
+    }
+
+    if (r_cityes_to.status_code != 200) {
+        std::cerr << "Ошибка запроса: " << r_cityes_to.status_code << std::endl;
+        return 1;
+    }
+
+    json data_city_from = json::parse(r_cityes_from.text);
+    json data_city_to = json::parse(r_cityes_to.text);
+
+    std::cout << find_city_yandex_code(data_city_from, cityes_from) << "\n";
+    std::cout << find_city_yandex_code(data_city_to, cityes_to) << "\n";
+
     ApiRequest request;
-    request.from = "c2";
-    request.to = "c77";
+    request.from = find_city_yandex_code(data_city_from, cityes_from);
+    request.to = find_city_yandex_code(data_city_to, cityes_to);
     request.date_from = DateParser(inputDate_from);
     request.date_to = DateParser(inputDate_to);
     request.apikey = "90dfe575-3c10-4440-a481-73a4650f08a1";
 
-    if (request.date_from.empty() || request.date_to.empty()) {
-        std::cerr << "Неправильный формат даты!" << std::endl;
-        return 1;
-    }
+    // if (request.date_from.empty() || request.date_to.empty()) {
+    //     std::cerr << "Неправильный формат даты!" << std::endl;
+    //     return 1;
+    // }
 
     std::string cacheKey_from = generateCacheKey(request.from, request.to, request.date_from, request.date_to);
     std::string cacheKey_to = generateCacheKey(request.to, request.from, request.date_to, request.date_from);
@@ -160,7 +211,7 @@ int main() {
 
     std::cout << "" << "\n";
     std::cout << "====================================" << "\n";
-    std::cout << "САНКТ-ПЕТЕРБУРГ" << " ⇄ " << "БЛАГОВЕЩЕНСК" << "\n";
+    std::cout << cityes_from << " ⇄ " << cityes_to << "\n";
     std::cout << "====================================" << "\n";
     std::cout << "" << "\n";
 
